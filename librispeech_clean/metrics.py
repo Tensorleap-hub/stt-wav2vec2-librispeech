@@ -37,7 +37,7 @@ def ctc_loss(logits: KerasTensor, numeric_labels: EagerTensor) -> EagerTensor:
 
     # Create logits tensors
     logits = tf.cast(logits, dtype=tf.float32)
-    logits = tf.transpose(logits, perm=[0, 2, 1])
+    #logits = tf.transpose(logits, perm=[0, 2, 1])
 
     # Convert required lengths to constants
     label_length = tf.constant([numeric_labels.shape[1]], dtype=tf.int64)

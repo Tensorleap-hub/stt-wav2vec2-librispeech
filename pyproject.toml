@@ -13,13 +13,26 @@ onnxruntime = "^1.15.1"
 transformers = "^4.32.1"
 evaluate = "^0.4.0"
 google-cloud-storage = "^2.10.0"
-onnx2kerastl = "^0.0.114"
+#onnx2kerastl = "^0.0.114"
 jiwer = "^3.0.3"
-librosa = "^0.10.1"
 matplotlib = "^3.7.2"
 sounddevice = "^0.4.6"
+onnx = "1.14.0"
+textblob = "^0.17.1"
+tensorflow = "2.13.1"
+librosa = "^0.10.1"
+readability = "^0.3.1"
+textatistic = "^0.0.1"
+textstat = "^0.7.3"
 
+
+[tool.poetry.group.dev.dependencies]
+setuptools = "^69.0.2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "leap_test: check_integration"
+custom_test = "leap_custom_test: check_custom_integration"
