@@ -53,11 +53,13 @@ values with higher values (green/ red dots colors).
 
 ![Untitled](images/spectral_flatness_min.png)_Model's Latent Space colored by minimum spectral flatness_
 
-RMS is a measure of the average energy in an audio signal. It can be seen that samples with higher loss have higher rms 
-std. 
+RMS stands for "Root Mean Square". RMS is a measurement of how much continuous power an audio signal produces. 
+This means that RMS tells us how loud sound is on average over time, taking into account the dynamic range of the signal. 
+It can be seen that samples with higher loss have higher rms std. 
 A large standard deviation suggests greater variability in the amplitudes of the audio signal. 
 In a speech signal, a larger standard deviation might indicate varying levels of emphasis or intensity in different 
 parts of the speech.
+
 
 ![Untitled](images/rms_std_vs_loss.png)_RMS std vs loss_
 
