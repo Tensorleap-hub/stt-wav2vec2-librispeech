@@ -2,13 +2,13 @@ bucket_name: example-datasets-47ml982d
 dataset_slices:
   train.100:
     path: librispeech-asr/train.100/data.csv
-    n_samples: 8  # out of 28539
+    n_samples: 500  # out of 28539
   validation:
     path: librispeech-asr/validation/data.csv
-    n_samples: 8  #  out of 2703
+    n_samples: 300  #  out of 2703
   test:
     path: librispeech-asr/test/data.csv
-    n_samples: 8  # out of 2620
+    n_samples: 200  # out of 2620
 
 model_hf_id: facebook/wav2vec2-base-960h
 
@@ -25,3 +25,4 @@ seed: 2023
 packages:
   - librosa
   - jiwer
+  - textstat
