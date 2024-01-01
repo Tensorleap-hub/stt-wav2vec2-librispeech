@@ -35,23 +35,27 @@ sample with short speech text.
   <img src="images/long_speech_spectrogram.png" alt="Image 1" style="width: 50%;">
   <img src="images/long_speech_waveform.png" alt="Image 2" style="width: 50%;">
 </div>
-_Long speech sample_
+
+*Long speech sample*
 
 
 <div style="display: flex;">
-  <img src="images/short_speech_spectrogram.png" alt="Image 1" style="width: 50%;">
-  <img src="images/short_speech_waveform.png" alt="Image 2" style="width: 50%;">
+  <img src="images/short_speech_spectrogram.png" alt="Image 3" style="width: 50%;">
+  <img src="images/short_speech_waveform.png" alt="Image 4" style="width: 50%;">
 </div>
+
 _Short speech sample_
 
 Spectral flatness is a measure that quantifies the tonal-to-noise ratio in a signal. A value closer to 0 indicates that 
 the spectrum is more tonal, while a value closer to 1 suggests a flatter, more noise-like spectrum. Therefore, lower 
 values of spectral flatness imply a more tonal or harmonically rich signal.
 
-Although not with large differences, a small group on the right side of the population exploration characterized by minimal spectral flatness 
-values with higher values (green/ red dots colors).
+Despite not having large differences, a small group on the right side of the population exploration has minimal spectral 
+flatness higher values (greener dots colors). 
+If we compare it to the Character Error Rate (CER) metric, we notice that it tends to be higher when the spectral 
+flatness min is higher (larger dots size).
 
-![Untitled](images/spectral_flatness_min.png)_Model's Latent Space colored by minimum spectral flatness_
+![Untitled](images/img.png)_Model's Latent Space colored by minimum spectral flatness_
 
 RMS stands for "Root Mean Square". RMS is a measurement of how much continuous power an audio signal produces. 
 This means that RMS tells us how loud sound is on average over time, taking into account the dynamic range of the signal. 
@@ -63,15 +67,27 @@ parts of the speech.
 
 ![Untitled](images/rms_std_vs_loss.png)_RMS std vs loss_
 
+Using tensorleap, we noticed that samples with high Word Error Rate (WER) tend to be those with continuous speech.
+It may be because a short pause may help each word to sound clearer.
+
+<div style="display: flex;">
+  <img src="images/loss_with_spaces.png" alt="Image 5" style="width: 50%;">
+  <img src="images/loss_without_spaces.png" alt="Image 6" style="width: 50%;">
+</div>
+
+_Speech with pause (left), speech without pauses (right)_
+
+
 By applying an unsupervised clustering algorithm (k-means) to the latent space of the model, the samples were segmented into five distinct clusters. 
 The more we examine a cluster on the left side of the space, we find that its characterized with higher values of 
 linsear write formula (calculates a readability score, the result is an estimate of the U.S. grade level needed to understand the text)
 and number of difficult words in teh text.
 
 <div style="display: flex;">
-  <img src="images/kmeans_vs_difficult_words.png" alt="Image 3" style="width: 50%;">
-  <img src="images/kmeans_vs_linsear_write_formula.png" alt="Image 4" style="width: 50%;">
+  <img src="images/kmeans_vs_difficult_words.png" alt="Image 7" style="width: 50%;">
+  <img src="images/kmeans_vs_linsear_write_formula.png" alt="Image 8" style="width: 50%;">
 </div>
+
 _Kmeans clusters_
 
 #### Metrices
