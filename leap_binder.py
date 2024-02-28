@@ -1,23 +1,29 @@
+
 from librispeech_clean.packages import install_all_packages
 
 install_all_packages()
-
+import nltk
 import pandas as pd
-from typing import List, Dict, Union
+from typing import List
 import numpy as np
 from code_loader.contract.enums import LeapDataType
-
+import textstat
+from textblob import TextBlob
 from librispeech_clean.configuration import config
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 from librispeech_clean.gcs_utils import download
 from librispeech_clean.metrics import ctc_loss, calculate_error_rate_metrics
-from librispeech_clean.utils import pad_gt_numeric_labels, get_speech_pauses_to_word_gaps
-from librispeech_clean.visualizers import display_predicted_transcription, display_gt_transcription, display_mel_spectrogram, \
+from librispeech_clean.utils import pad_gt_numeric_labels
+from librispeech_clean.visualizers import display_predicted_transcription, display_gt_transcription, \
+    display_mel_spectrogram, \
     display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap
 from librispeech_clean.wav2vec_processor import ProcessorSingleton
-from librosa.feature import spectral_flatness, spectral_contrast
+from librosa.feature import spectral_flatness, spectral_contrast, melspectrogram, mfcc, rms, spectral_centroid, \
+    spectral_bandwidth, spectral_rolloff, poly_features, zero_crossing_rate
+
+nltk.download('punkt')
 
 
 # -data processing-
@@ -55,31 +61,132 @@ def get_gt_transcription(idx: int, data: PreprocessResponse) -> np.ndarray:
     return padded_labels
 
 
-# -metadata-
-def get_metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[int, float, str]]:
+from typing import Dict, Union
+
+
+def get_metadata_speech_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[int, float, str]]:
     sample = data.data.iloc[idx]
     audio_array = get_input_audio(idx, data, padded=False)
-    sf = spectral_flatness(y=audio_array)
-    sc = spectral_contrast(y=audio_array)
+    sr = config.get_parameter('sampling_rate')
+
+    # Extract features
+    features = {
+        'spectral_flatness': spectral_flatness(y=audio_array),
+        'spectral_contrast': spectral_contrast(y=audio_array),
+        'melspectrogram': melspectrogram(y=audio_array, sr=sr),
+        'mfcc': mfcc(y=audio_array, sr=sr),
+        'rms': rms(y=audio_array),
+        'spectral_centroid': spectral_centroid(y=audio_array, sr=sr),
+        'spectral_bandwidth': spectral_bandwidth(y=audio_array, sr=sr),
+        'spectral_rolloff': spectral_rolloff(y=audio_array, sr=sr),
+        'poly_features': poly_features(y=audio_array, sr=sr),
+        'zero_crossing_rate': zero_crossing_rate(y=audio_array),
+    }
+
+    # Extract statistics for each feature
+    statistics = {f'{key}_{stat}': float(getattr(value, stat)()) for key, value in features.items() for stat in
+                  ['min', 'max', 'mean', 'std']}
+
+    # Additional metadata
     metadata = {
         'index': int(idx),
+        'file_name': str(data.data.index[idx]),
         'speaker_id': int(sample['speaker_id']),
         'chapter_id': int(sample['chapter_id']),
-        'word_count': len(sample['text'].split()),
-        'pauses_word_gaps_diff': get_speech_pauses_to_word_gaps(audio_array, sample['text']),
         'signal_mean': float(audio_array.mean()),
         'signal_std': float(audio_array.std()),
-        'spectral_flatness_mean': float(sf.mean()),
-        'spectral_flatness_std': float(sf.std()),
-        'spectral_flatness_max': float(sf.max()),
-        'spectral_flatness_min': float(sf.min()),
-        'spectral_contrast_mean': float(sc.mean()),
-        'spectral_contrast_std': float(sc.std()),
-        'spectral_contrast_max': float(sc.max()),
-        'spectral_contrast_min': float(sc.min()),
-        'file_name': str(data.data.index[idx]),
     }
-    metadata = {k: round(v, 4) if not isinstance(v, str) else v for k, v in metadata.items()}
+
+    # Combine metadata and feature statistics
+    result = {**metadata, **statistics}
+
+    # Round numeric values if needed
+    result = {k: round(v, 4) if not isinstance(v, str) else v for k, v in result.items()}
+
+    return result
+
+
+def average_word_length(word_list):
+    total_length = sum(len(word) for word in word_list)
+    if len(word_list) > 0:
+        return total_length / len(word_list)
+    else:
+        return 0
+
+
+def min_word_length(word_list):
+    min_word = min(word_list, key=len)
+    min_length = len(min_word)
+    return min_length
+
+
+def max_word_length(word_list):
+    max_word = max(word_list, key=len)
+    max_length = len(max_word)
+    return max_length
+
+
+def char_max(transcription_no_spaces):
+    char_count = {}
+
+    for char in transcription_no_spaces:
+        if char in char_count:
+            char_count[char] += 1
+        else:
+            char_count[char] = 1
+
+    max_char = max(char_count, key=char_count.get)
+    max_count = char_count[max_char]
+
+    min_char = min(char_count, key=char_count.get)
+    min_count = char_count[min_char]
+
+    return max_char, max_count, min_char, min_count
+
+
+def get_metadata_text_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[int, float, str]]:
+    data = data.data
+    transcription = data.iloc[idx]['text']
+    text = TextBlob(transcription)
+    transcription_no_spaces = "".join(transcription.split())
+
+    word_list = text.words
+    max_char, max_char_count, min_char, min_char_count = char_max(transcription_no_spaces)
+    metadata = {
+        'word_count': len(word_list),
+        'average_word_length': average_word_length(word_list),
+        'min_word_length': min_word_length(word_list),
+        'max_word_length': max_word_length(word_list),
+        'char_count': len(transcription_no_spaces),
+        'max_char': max_char,
+        'max_char_count': max_char_count,
+        'min_char': min_char,
+        'min_char_count': min_char_count
+
+    }
+
+    return metadata
+
+
+def get_metadata_readability_text(idx: int, data: PreprocessResponse):
+    data = data.data
+    transcription = data.iloc[idx]['text']
+    if transcription[-1] != ".":
+        transcription = transcription + "."
+
+    metadata = {
+        "syllable_count": textstat.syllable_count(transcription, lang='en_US'),
+        "lexicon_count": textstat.lexicon_count(transcription, removepunct=True),
+        "sentence_count": textstat.sentence_count(transcription),
+        "flesch_reading_ease": textstat.flesch_reading_ease(transcription),
+        "flesch_kincaid_grade": textstat.flesch_kincaid_grade(transcription),
+        "gunning_fog": textstat.gunning_fog(transcription),
+        "dale_chall_readability_score": textstat.dale_chall_readability_score(transcription),
+        "difficult_words": textstat.difficult_words(transcription),
+        "linsear_write_formula": textstat.linsear_write_formula(transcription),
+        "text_standard": textstat.text_standard(transcription)
+
+    }
     return metadata
 
 
@@ -93,7 +200,9 @@ leap_binder.add_prediction('characters',
 leap_binder.add_custom_metric(calculate_error_rate_metrics, 'error_rate_metrics')
 leap_binder.add_custom_loss(ctc_loss, 'ctc_loss')
 
-leap_binder.set_metadata(get_metadata_dict, '')
+leap_binder.set_metadata(get_metadata_speech_dict, 'metadata_speech_dict')
+leap_binder.set_metadata(get_metadata_text_dict, 'metadata_text_dict')
+leap_binder.set_metadata(get_metadata_readability_text, 'metadata_readability_text')
 
 leap_binder.set_visualizer(display_predicted_transcription, name='transcription',
                            visualizer_type=LeapDataType.Text)
