@@ -1,5 +1,5 @@
 import numpy as np
-from code_loader.contract.visualizer_classes import LeapText, LeapImage, LeapGraph
+from code_loader.contract.visualizer_classes import LeapText, LeapImage, LeapGraph, LeapTextMask
 import numpy.typing as npt
 
 from librispeech_clean.configuration import config
@@ -11,6 +11,7 @@ from librosa import power_to_db, resample
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from matplotlib import cm as cmx
+from jiwer import process_characters
 
 cmap = plt.get_cmap('magma')
 cNorm = colors.Normalize(vmin=0, vmax=1)
@@ -71,3 +72,37 @@ def display_waveform_heatmap(data: npt.NDArray[np.float32]) -> np.ndarray:
     #                              target_sr=config.get_parameter('sampling_rate') // 10)
     res = resized_data.reshape(-1, 1)
     return res
+
+
+def vis_alignments(prediction: np.ndarray, numeric_labels: np.ndarray) -> LeapTextMask:
+    """
+    Returns: LeapTextMask Vis
+    mask: npt.NDArray[np.uint8]: length of text with labels in each index
+    text: List[str]
+    labels: List[str]
+    type: LeapDataType = LeapDataType.TextMask
+    """
+    numeric_labels = remove_trailing_zeros(numeric_labels[0])
+    processor = ProcessorSingleton().get_processor()
+    processed_pred = np.argmax(prediction, 2)[0]
+    transcription = processor.decode(processed_pred)
+    reference = processor.tokenizer.decode(numeric_labels)
+
+    character_process_out = process_characters(reference, transcription)
+    text = list(reference)
+    mask = np.zeros(len(text), dtype=np.uint8)
+    labels = ["-", "hit"]
+
+    alignments = character_process_out.alignments
+    for align in alignments[0]:
+        if align.type == "equal":
+            start, end = align.ref_start_idx, align.ref_end_idx
+            # align.hyp_start_idx, align.hyp_end_idx
+            mask[start: end] = 1
+
+        # todo: add also insertion, deletion sub?
+
+    return LeapTextMask(mask, text, labels)
+
+
+# todo: add also ofr prediction to show heatmaps

@@ -18,7 +18,7 @@ from librispeech_clean.metrics import ctc_loss, calculate_error_rate_metrics
 from librispeech_clean.utils import pad_gt_numeric_labels
 from librispeech_clean.visualizers import display_predicted_transcription, display_gt_transcription, \
     display_mel_spectrogram, \
-    display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap
+    display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap, vis_alignments
 from librispeech_clean.wav2vec_processor import ProcessorSingleton
 from librosa.feature import spectral_flatness, spectral_contrast, melspectrogram, mfcc, rms, spectral_centroid, \
     spectral_bandwidth, spectral_rolloff, poly_features, zero_crossing_rate
@@ -71,16 +71,16 @@ def get_metadata_speech_dict(idx: int, data: PreprocessResponse) -> Dict[str, Un
 
     # Extract features
     features = {
-        'spectral_flatness': spectral_flatness(y=audio_array),
-        'spectral_contrast': spectral_contrast(y=audio_array),
-        'melspectrogram': melspectrogram(y=audio_array, sr=sr),
-        'mfcc': mfcc(y=audio_array, sr=sr),
-        'rms': rms(y=audio_array),
-        'spectral_centroid': spectral_centroid(y=audio_array, sr=sr),
-        'spectral_bandwidth': spectral_bandwidth(y=audio_array, sr=sr),
-        'spectral_rolloff': spectral_rolloff(y=audio_array, sr=sr),
-        'poly_features': poly_features(y=audio_array, sr=sr),
-        'zero_crossing_rate': zero_crossing_rate(y=audio_array),
+            'spectral_flatness': spectral_flatness(y=audio_array),
+            'spectral_contrast': spectral_contrast(y=audio_array),
+            'melspectrogram': melspectrogram(y=audio_array, sr=sr),
+            'mfcc': mfcc(y=audio_array, sr=sr),
+            'rms': rms(y=audio_array),
+            'spectral_centroid': spectral_centroid(y=audio_array, sr=sr),
+            'spectral_bandwidth': spectral_bandwidth(y=audio_array, sr=sr),
+            'spectral_rolloff': spectral_rolloff(y=audio_array, sr=sr),
+            'poly_features': poly_features(y=audio_array, sr=sr),
+            'zero_crossing_rate': zero_crossing_rate(y=audio_array),
     }
 
     # Extract statistics for each feature
@@ -214,6 +214,8 @@ leap_binder.set_visualizer(display_mel_spectrogram, name='mel_spectrogram',
 leap_binder.set_visualizer(display_waveform, name='waveform',
                            heatmap_visualizer=display_waveform_heatmap,
                            visualizer_type=LeapDataType.Graph)
+
+leap_binder.set_visualizer(vis_alignments, name="text_alignments")
 
 if __name__ == '__main__':
     leap_binder.check()
