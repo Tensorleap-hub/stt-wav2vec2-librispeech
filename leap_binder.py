@@ -18,7 +18,7 @@ from librispeech_clean.metrics import ctc_loss, calculate_error_rate_metrics
 from librispeech_clean.utils import pad_gt_numeric_labels
 from librispeech_clean.visualizers import display_predicted_transcription, display_gt_transcription, \
     display_mel_spectrogram, \
-    display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap, vis_alignments_gt, vis_alignments_pred
+    display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap, vis_alignments_pred
 from librispeech_clean.wav2vec_processor import ProcessorSingleton
 from librosa.feature import spectral_flatness, spectral_contrast, melspectrogram, mfcc, rms, spectral_centroid, \
     spectral_bandwidth, spectral_rolloff, poly_features, zero_crossing_rate
@@ -245,7 +245,6 @@ leap_binder.set_visualizer(display_waveform, name='waveform',
                            heatmap_visualizer=display_waveform_heatmap,
                            visualizer_type=LeapDataType.Graph)
 
-leap_binder.set_visualizer(vis_alignments_gt, name="vis_alignments_gt", visualizer_type=LeapDataType.TextMask)
 leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
 
 if __name__ == '__main__':
