@@ -21,14 +21,16 @@ Connectionist temporal classification (CTC) loss.
 
 ### Latent Space Exploration
 
-Initially, you'll notice that the latent space is organized in such a way that the samples with fewer words are 
-positioned towards the right, while those with a higher word count are clustered towards the left.
-The model has better results on longer texts.
+Initially, you'll notice that the latent space is organized in such a way that the samples with fewer words with mainly short records are 
+positioned towards the right, while those with a higher word count and mainly longer record length are positioned towards the left.
+When the model has better results on the longer records and texts. To demonstrate we color the samples based on the words count and based on the record time:
 
 ![Untitled](images/dict_word_count.png)_Model's Latent Space colored by Word count_
 
-In the sample analysis below we can see an example of a sample with long speech, long text in comparison to a 
-sample with short speech text. 
+![Untitled](images/minutes_record.png)_Model's Latent Space colored by record minutes length_
+
+We visualize below an example of a sample with long speech duration in comparison to a 
+sample with short record speech and text. 
 
 
 <div style="display: flex;">
@@ -46,53 +48,21 @@ sample with short speech text.
 
 _Short speech sample_
 
-Spectral flatness is a measure that quantifies the tonal-to-noise ratio in a signal. A value closer to 0 indicates that 
-the spectrum is more tonal, while a value closer to 1 suggests a flatter, more noise-like spectrum. Therefore, lower 
-values of spectral flatness imply a more tonal or harmonically rich signal.
-
-Despite not having large differences, a small group on the right side of the population exploration has minimal spectral 
-flatness higher values (greener dots colors). 
-If we compare it to the Character Error Rate (CER) metric, we notice that it tends to be higher when the spectral 
-flatness min is higher (larger dots size).
-
-![Untitled](images/img.png)_Model's Latent Space colored by minimum spectral flatness_
-
-RMS stands for "Root Mean Square". RMS is a measurement of how much continuous power an audio signal produces. 
-This means that RMS tells us how loud sound is on average over time, taking into account the dynamic range of the signal. 
-It can be seen that samples with higher loss have higher rms std. 
-A large standard deviation suggests greater variability in the amplitudes of the audio signal. 
-In a speech signal, a larger standard deviation might indicate varying levels of emphasis or intensity in different 
-parts of the speech.
+Additionally, we observe that the latent space is almost perfectly divided based on the speaker's gender:
+![Untitled](images/gender_record.png)_Model's Latent Space colored by record minutes length_
 
 
-![Untitled](images/rms_std_vs_loss.png)_RMS std vs loss_
+### Weak Clusters Detection
+Tensorleap's engine calculates and detects using unsupervised methods clusters that tend to have lower performance than the overall data distribution.
+For instance, we can observe a low performance cluster detected in the platform that consist mainly Female samples with high `spectral centroid mean` (correspond to high pitch):
 
-Using tensorleap, we noticed that samples with high Word Error Rate (WER) tend to be those with continuous speech.
-It may be because a short pause may help each word to sound clearer.
-
-<div style="display: flex;">
-  <img src="images/loss_with_spaces.png" alt="Image 5" style="width: 50%;">
-  <img src="images/loss_without_spaces.png" alt="Image 6" style="width: 50%;">
-</div>
-
-_Speech with pause (left), speech without pauses (right)_
+![Untitled](images/FhighPitch_weak_cluster.png)_Low Performance Cluster: female gender and high pitch_
 
 
-By applying an unsupervised clustering algorithm (k-means) to the latent space of the model, the samples were segmented into five distinct clusters. 
-The more we examine a cluster on the left side of the space, we find that its characterized with higher values of 
-linsear write formula (calculates a readability score, the result is an estimate of the U.S. grade level needed to understand the text)
-and number of difficult words in teh text.
 
-<div style="display: flex;">
-  <img src="images/kmeans_vs_difficult_words.png" alt="Image 7" style="width: 50%;">
-  <img src="images/kmeans_vs_linsear_write_formula.png" alt="Image 8" style="width: 50%;">
-</div>
+### Dashboard
 
-_Kmeans clusters_
-
-#### Metrices
-
-We have added several metrics to the model. Using Tensorleap we can easily bild an analytics dashboard. In the screenshot 
+We have added several metrics to the model. Using Tensorleap we can easily build an analytics dashboard. In the screenshot 
 below we can see a dashboard contain the dale chall readability score VS all metrics.
 Dale chall readability score computes a readability score based on a formula that considers the use of difficult words 
 in the text, higher results indicate on higher difficulty.
