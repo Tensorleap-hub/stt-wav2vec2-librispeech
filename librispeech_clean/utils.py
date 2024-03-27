@@ -68,3 +68,26 @@ def numeric_labels_to_text():
 
 def logits_to_text():
     pass
+
+
+
+def plot_text_mask(text, mask):
+    import matplotlib.pyplot as plt
+
+    # Plotting
+    fig, ax = plt.subplots()
+    for i, (c, m) in enumerate(zip(text, mask)):
+        x = i * 4  # X position of the text
+        y = 0  # Y position of the text
+        if m:
+            # Highlighted text
+            ax.text(x, y, c, color='red', fontsize=12)
+        else:
+            # Regular text
+            ax.text(x, y, c, color='black', fontsize=12)
+
+    # Setting limits and turning off axes
+    ax.set_xlim(0, len(text))
+    ax.set_ylim(-1, 1)
+    plt.axis('off')
+    plt.show()

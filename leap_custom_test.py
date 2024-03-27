@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 import onnxruntime as ort
 import tensorflow as tf
 # from onnx2kerastl.customonnxlayer import onnx_custom_objects_map
-from librispeech_clean.custom_layers import *
+from onnx2kerastl.customonnxlayer.onnxsqrt import OnnxSqrt
+from onnx2kerastl.customonnxlayer.onnxreducemean import OnnxReduceMean
+from onnx2kerastl.customonnxlayer.onnxerf import OnnxErf
+# from librispeech_clean.custom_layers import *
 from leap_binder import get_data_subsets, get_input_audio, get_gt_transcription, get_metadata_speech_dict, \
     get_metadata_text_dict, get_metadata_readability_text
 from librispeech_clean.metrics import ctc_loss, calculate_error_rate_metrics
@@ -56,9 +59,10 @@ if __name__ == '__main__':
         keras_predicted_ids = np.argmax(keras_logits[0, ...].numpy(), axis=0)
 
         keras_transcribed_text = tokenizer.batch_decode(keras_predicted_ids)
+        keras_logits = keras_logits.numpy().transpose((0, 2, 1))
         #
         loss = ctc_loss(logits=keras_logits, numeric_labels=batched_gt)
-        error_rate_metrics = calculate_error_rate_metrics(prediction=keras_logits.numpy(),
+        error_rate_metrics = calculate_error_rate_metrics(prediction=keras_logits,
                                                           numeric_labels=batched_gt.numpy())
 
         predicted_text = display_predicted_transcription(keras_logits[0, ...].numpy())

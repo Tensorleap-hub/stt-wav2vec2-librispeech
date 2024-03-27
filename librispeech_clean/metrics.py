@@ -111,6 +111,8 @@ def calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndar
         'word_deletion': word_process_out.deletions,
         'word_insertion': word_process_out.insertions,
         'word_substitution': word_process_out.substitutions,
+        'word_hits': word_process_out.hits,
+        'char_hits': character_process_out.hits,
         'char_deletion': character_process_out.deletions,
         'char_insertion': character_process_out.insertions,
         'char_substitution': character_process_out.substitutions,

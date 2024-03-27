@@ -18,13 +18,30 @@ from librispeech_clean.metrics import ctc_loss, calculate_error_rate_metrics
 from librispeech_clean.utils import pad_gt_numeric_labels
 from librispeech_clean.visualizers import display_predicted_transcription, display_gt_transcription, \
     display_mel_spectrogram, \
-    display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap
+    display_mel_spectrogram_heatmap, display_waveform, display_waveform_heatmap, vis_alignments_pred
 from librispeech_clean.wav2vec_processor import ProcessorSingleton
 from librosa.feature import spectral_flatness, spectral_contrast, melspectrogram, mfcc, rms, spectral_centroid, \
     spectral_bandwidth, spectral_rolloff, poly_features, zero_crossing_rate
 
 nltk.download('punkt')
 
+
+def merge_records_metadata(df: pd.DataFrame):
+    fpaths = config.get_parameter('metadata_file_names')
+    fbooks, fchapters, fspeakers = fpaths
+    fbooks = download(fbooks)
+    fchapters = download(fchapters)
+    fspeakers = download(fspeakers)
+    df_books = pd.read_csv(fbooks, sep='\s+\|\s*', header=None, engine="python", names=["chapter_id", "values", "comment"])
+    df_chaps = pd.read_csv(fchapters, sep='|', header=13, engine="python")
+    df_speaks = pd.read_csv(fspeakers, sep='\s+\|\s*', header=11, engine="python").reset_index()
+    df_speaks.columns = ["id", "gender", "subset", "minutes", "name"]
+    df = df.merge(df_speaks, how="left", left_on="speaker_id", right_on="id", suffixes=('', '_speaks')).drop(["id_speaks"], axis=1)
+    df = df.merge(df_chaps, how="left", left_on="chapter_id", right_on=';ID    ', suffixes=('', '_chap'))
+    df = df.rename(columns={';ID    ': 'id_chaps', 'READER': 'reader', 'MINUTES': 'reader', ' SUBSET           ': 'subset',
+                       ' PROJ.': 'project_chap', 'BOOK ID': 'book_id', ' CH. TITLE ': 'chap_title',
+                       ' PROJECT TITLE': 'project_title'})
+    return df
 
 # -data processing-
 def get_data_subsets() -> List[PreprocessResponse]:
@@ -33,6 +50,7 @@ def get_data_subsets() -> List[PreprocessResponse]:
         if slice_dict['path'] is not None:
             fpath = download(slice_dict['path'])
             data = pd.read_csv(fpath, index_col=0)
+            data = merge_records_metadata(data)
             data = data.sample(n=slice_dict['n_samples'], random_state=config.get_parameter('seed'))
             response = PreprocessResponse(length=slice_dict['n_samples'], data=data)
             responses.append(response)
@@ -71,16 +89,16 @@ def get_metadata_speech_dict(idx: int, data: PreprocessResponse) -> Dict[str, Un
 
     # Extract features
     features = {
-        'spectral_flatness': spectral_flatness(y=audio_array),
-        'spectral_contrast': spectral_contrast(y=audio_array),
-        'melspectrogram': melspectrogram(y=audio_array, sr=sr),
-        'mfcc': mfcc(y=audio_array, sr=sr),
-        'rms': rms(y=audio_array),
-        'spectral_centroid': spectral_centroid(y=audio_array, sr=sr),
-        'spectral_bandwidth': spectral_bandwidth(y=audio_array, sr=sr),
-        'spectral_rolloff': spectral_rolloff(y=audio_array, sr=sr),
-        'poly_features': poly_features(y=audio_array, sr=sr),
-        'zero_crossing_rate': zero_crossing_rate(y=audio_array),
+            'spectral_flatness': spectral_flatness(y=audio_array),
+            'spectral_contrast': spectral_contrast(y=audio_array),
+            'melspectrogram': melspectrogram(y=audio_array, sr=sr),
+            'mfcc': mfcc(y=audio_array, sr=sr),
+            'rms': rms(y=audio_array),
+            'spectral_centroid': spectral_centroid(y=audio_array, sr=sr),
+            'spectral_bandwidth': spectral_bandwidth(y=audio_array, sr=sr),
+            'spectral_rolloff': spectral_rolloff(y=audio_array, sr=sr),
+            'poly_features': poly_features(y=audio_array, sr=sr),
+            'zero_crossing_rate': zero_crossing_rate(y=audio_array),
     }
 
     # Extract statistics for each feature
@@ -190,6 +208,17 @@ def get_metadata_readability_text(idx: int, data: PreprocessResponse):
     return metadata
 
 
+def get_records_metadata(idx: int, data: PreprocessResponse):
+    metadata_dic = {}
+    df = data.data
+    metadata_dic["gender"] = df.gender.iloc[idx]
+    metadata_dic["minutes"] = df.minutes.iloc[idx]
+    metadata_dic["project_chap"] = str(df.project_chap.iloc[idx])
+    return metadata_dic
+
+
+
+
 leap_binder.set_preprocess(get_data_subsets)
 leap_binder.set_input(get_input_audio, 'audio_array')
 leap_binder.set_ground_truth(get_gt_transcription, 'numeric_labels')
@@ -203,6 +232,7 @@ leap_binder.add_custom_loss(ctc_loss, 'ctc_loss')
 leap_binder.set_metadata(get_metadata_speech_dict, 'metadata_speech_dict')
 leap_binder.set_metadata(get_metadata_text_dict, 'metadata_text_dict')
 leap_binder.set_metadata(get_metadata_readability_text, 'metadata_readability_text')
+leap_binder.set_metadata(get_records_metadata, 'metadata_records')
 
 leap_binder.set_visualizer(display_predicted_transcription, name='transcription',
                            visualizer_type=LeapDataType.Text)
@@ -214,6 +244,8 @@ leap_binder.set_visualizer(display_mel_spectrogram, name='mel_spectrogram',
 leap_binder.set_visualizer(display_waveform, name='waveform',
                            heatmap_visualizer=display_waveform_heatmap,
                            visualizer_type=LeapDataType.Graph)
+
+leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
 
 if __name__ == '__main__':
     leap_binder.check()
