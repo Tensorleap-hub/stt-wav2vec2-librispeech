@@ -24,6 +24,7 @@ librosa = "^0.10.1"
 readability = "^0.3.1"
 textatistic = "^0.0.1"
 textstat = "^0.7.3"
+opencv-python = "^4.9.0.80"
 
 
 [tool.poetry.group.dev.dependencies]
