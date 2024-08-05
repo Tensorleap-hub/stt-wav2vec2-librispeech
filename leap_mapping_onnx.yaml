@@ -3,73 +3,41 @@ decorators:
     data:
       type: Input
       output_name: audio_array
-    id: '181'
+    id: '182'
     inputs: {}
     outputs:
       audio_array:
         - inputKey: input
           operation: Permute
           name: permute_17
-          id: '180'
+          id: '181'
         - inputKey: data
           operation: Visualizer
-          id: '758'
+          id: '772'
         - inputKey: data
           operation: Visualizer
-          id: '759'
-  - operation: Visualizer
-    data:
-      type: Visualizer
-      name: mel_spectrogram
-      visualizer_name: mel_spectrogram
-      visualizer_type: Image
-      arg_names:
-        - data
-      user_unique_name: mel_spectrogram
-    id: '758'
-    inputs:
-      data:
-        - outputKey: audio_array
-          operation: Input
-          id: '181'
-    outputs: {}
-  - operation: Visualizer
-    data:
-      type: Visualizer
-      name: waveform
-      visualizer_name: waveform
-      visualizer_type: Graph
-      arg_names:
-        - data
-      user_unique_name: waveform
-    id: '759'
-    inputs:
-      data:
-        - outputKey: audio_array
-          operation: Input
-          id: '181'
-    outputs: {}
+          id: '773'
   - operation: GroundTruth
     data:
       type: GroundTruth
       output_name: numeric_labels
       selected: numeric_labels
-    id: '760'
+    id: '767'
     inputs: {}
     outputs:
       numeric_labels:
-        - inputKey: numeric_labels
-          operation: Metric
-          id: '763'
         - inputKey: data
           operation: Visualizer
-          id: '764'
+          id: '771'
         - inputKey: numeric_labels
           operation: Visualizer
-          id: '766'
+          id: '774'
+        - inputKey: numeric_labels
+          operation: Metric
+          id: '775'
         - inputKey: numeric_labels
           operation: CustomLoss
-          id: '761'
+          id: '768'
   - operation: CustomLoss
     data:
       arg_names:
@@ -79,70 +47,33 @@ decorators:
       name: ctc_loss
       selected: ctc_loss
       type: CustomLoss
-    id: '761'
+    id: '768'
     inputs:
       logits:
         - outputKey: merged
           operation: TFOpLambda
           name: tf.__operators__.add_149
-          id: '1'
+          id: '2'
       numeric_labels:
         - outputKey: numeric_labels
           operation: GroundTruth
-          id: '760'
+          id: '767'
     outputs:
       loss:
         - inputKey: '0'
           operation: Adam
-          id: '762'
+          id: '769'
   - operation: Adam
     data:
       type: Optimizer
       custom_input_keys:
-        - 762-0
-    id: '762'
+        - 769-0
+    id: '769'
     inputs:
       '0':
         - outputKey: loss
           operation: CustomLoss
-          id: '761'
-    outputs: {}
-  - operation: Metric
-    data:
-      type: Metric
-      name: error_rate_metrics
-      metric_name: error_rate_metrics
-      arg_names:
-        - prediction
-        - numeric_labels
-      user_unique_name: error_rate_metrics
-    id: '763'
-    inputs:
-      prediction:
-        - outputKey: merged
-          operation: TFOpLambda
-          name: tf.__operators__.add_149
-          id: '1'
-      numeric_labels:
-        - outputKey: numeric_labels
-          operation: GroundTruth
-          id: '760'
-    outputs: {}
-  - operation: Visualizer
-    data:
-      type: Visualizer
-      name: reference
-      visualizer_name: reference
-      visualizer_type: Text
-      arg_names:
-        - data
-      user_unique_name: reference
-    id: '764'
-    inputs:
-      data:
-        - outputKey: numeric_labels
-          operation: GroundTruth
-          id: '760'
+          id: '768'
     outputs: {}
   - operation: Visualizer
     data:
@@ -153,13 +84,61 @@ decorators:
       arg_names:
         - data
       user_unique_name: transcription
-    id: '765'
+    id: '770'
     inputs:
       data:
         - outputKey: merged
           operation: TFOpLambda
           name: tf.__operators__.add_149
-          id: '1'
+          id: '2'
+    outputs: {}
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      name: reference
+      visualizer_name: reference
+      visualizer_type: Text
+      arg_names:
+        - data
+      user_unique_name: reference
+    id: '771'
+    inputs:
+      data:
+        - outputKey: numeric_labels
+          operation: GroundTruth
+          id: '767'
+    outputs: {}
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      name: mel_spectrogram
+      visualizer_name: mel_spectrogram
+      visualizer_type: Image
+      arg_names:
+        - data
+      user_unique_name: mel_spectrogram
+    id: '772'
+    inputs:
+      data:
+        - outputKey: audio_array
+          operation: Input
+          id: '182'
+    outputs: {}
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      name: waveform
+      visualizer_name: waveform
+      visualizer_type: Graph
+      arg_names:
+        - data
+      user_unique_name: waveform
+    id: '773'
+    inputs:
+      data:
+        - outputKey: audio_array
+          operation: Input
+          id: '182'
     outputs: {}
   - operation: Visualizer
     data:
@@ -171,21 +150,37 @@ decorators:
         - prediction
         - numeric_labels
       user_unique_name: vis_alignments_pred
-    id: '766'
+    id: '774'
     inputs:
       prediction:
         - outputKey: merged
           operation: TFOpLambda
           name: tf.__operators__.add_149
-          id: '1'
+          id: '2'
       numeric_labels:
         - outputKey: numeric_labels
           operation: GroundTruth
-          id: '760'
+          id: '767'
     outputs: {}
-layers:
-  - operation: TFOpLambda
+  - operation: Metric
     data:
-      prediction_type: characters
-    name: tf.__operators__.add_149
-    id: '1'
+      type: Metric
+      name: error_rate_metrics
+      metric_name: error_rate_metrics
+      arg_names:
+        - prediction
+        - numeric_labels
+      user_unique_name: error_rate_metrics
+    id: '775'
+    inputs:
+      prediction:
+        - outputKey: merged
+          operation: TFOpLambda
+          name: tf.__operators__.add_149
+          id: '2'
+      numeric_labels:
+        - outputKey: numeric_labels
+          operation: GroundTruth
+          id: '767'
+    outputs: {}
+layers: []
