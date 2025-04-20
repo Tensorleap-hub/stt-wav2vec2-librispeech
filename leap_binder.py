@@ -247,5 +247,3 @@ leap_binder.set_visualizer(display_waveform, name='waveform',
 
 leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
 
-if __name__ == '__main__':
-    leap_binder.check()
