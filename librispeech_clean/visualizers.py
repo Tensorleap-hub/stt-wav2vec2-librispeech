@@ -19,6 +19,7 @@ scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cmap)
 
 
 def display_predicted_transcription(data: npt.NDArray[np.float32]) -> LeapText:
+    data = np.squeeze(data)
     processor = ProcessorSingleton().get_processor()
     predicted_ids = np.argmax(data, axis=1)
     text = [processor.decode(predicted_ids)]
@@ -26,6 +27,7 @@ def display_predicted_transcription(data: npt.NDArray[np.float32]) -> LeapText:
 
 
 def display_gt_transcription(data: npt.NDArray[np.float32]) -> LeapText:
+    data = np.squeeze(data)
     numeric_labels = remove_trailing_zeros(data)
     processor = ProcessorSingleton().get_processor()
     text = [processor.tokenizer.decode(numeric_labels)]
@@ -34,6 +36,7 @@ def display_gt_transcription(data: npt.NDArray[np.float32]) -> LeapText:
 
 def display_mel_spectrogram(data: npt.NDArray[np.float32]) -> LeapImage:
     # data_trimmed = remove_trailing_zeros(data)
+    data = np.squeeze(data)
     resized_data = data[:config.get_parameter('clip_visualizers')]
     ms = melspectrogram(y=resized_data, sr=config.get_parameter('sampling_rate'), )
     ms_db = power_to_db(ms, ref=np.max)
@@ -87,6 +90,8 @@ def vis_alignments_pred(prediction: np.ndarray, numeric_labels: np.ndarray) -> L
     labels: List[str]
     type: LeapDataType = LeapDataType.TextMask
     """
+    prediction = np.squeeze(prediction)
+    numeric_labels = np.squeeze(numeric_labels)
     numeric_labels = remove_trailing_zeros(numeric_labels)
     processor = ProcessorSingleton().get_processor()
     processed_pred = np.argmax(prediction, 1)
