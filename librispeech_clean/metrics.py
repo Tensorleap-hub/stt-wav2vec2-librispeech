@@ -51,7 +51,7 @@ def ctc_loss(logits: np.ndarray, numeric_labels: np.ndarray) -> EagerTensor:
                               blank_index=0,
                               logits_time_major=False)
 
-    return ctc_loss
+    return ctc_loss.numpy()
 
 
 def calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndarray):
@@ -118,5 +118,5 @@ def calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndar
         'char_substitution': character_process_out.substitutions,
 
     }
-    results = {k: tf.convert_to_tensor([v]) for k, v in results.items()}
+    results = {k: np.array([v]) for k, v in results.items()}
     return results
