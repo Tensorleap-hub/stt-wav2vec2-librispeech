@@ -5,6 +5,8 @@ install_all_packages()
 import nltk
 # nltk.download('punkt')
 nltk.download('punkt_tab')
+#TODO: can replace nltk.download('punkt_tab') : # nltk.data.path.append('/nfs/nltk_data')  # Adjust based on your system
+# nltk.download('punkt', download_dir='/nfs/nltk_data')
 import pandas as pd
 from typing import List
 import numpy as np
