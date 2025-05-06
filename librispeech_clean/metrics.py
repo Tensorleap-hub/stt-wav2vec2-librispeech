@@ -9,7 +9,7 @@ import tensorflow as tf
 from jiwer import process_words, process_characters
 
 
-def ctc_loss(logits: KerasTensor, numeric_labels: EagerTensor) -> EagerTensor:
+def ctc_loss(logits: np.ndarray, numeric_labels: np.ndarray) -> EagerTensor:
     """
     Calculate the Connectionist Temporal Classification (CTC) loss for a given set of logits and numeric labels.
 
@@ -17,7 +17,7 @@ def ctc_loss(logits: KerasTensor, numeric_labels: EagerTensor) -> EagerTensor:
     to train models to align input sequences with their corresponding target labels.
 
     Args:
-        logits: Logits tensor representing the predicted probabilities for each class at each time step.
+        logits: Logits representing the predicted probabilities for each class at each time step.
         numeric_labels: Numeric labels tensor containing the target labels for alignment.
 
     Returns:
@@ -28,7 +28,7 @@ def ctc_loss(logits: KerasTensor, numeric_labels: EagerTensor) -> EagerTensor:
         that the output_length parameter must be specified correctly using `config.get_parameter('output_length')`.
     """
 
-    numeric_labels = remove_trailing_zeros(numeric_labels.numpy()[0])
+    numeric_labels = remove_trailing_zeros(numeric_labels[0])
     output_length = config.get_parameter('output_length')
 
     # Create the labels tensor
@@ -51,7 +51,7 @@ def ctc_loss(logits: KerasTensor, numeric_labels: EagerTensor) -> EagerTensor:
                               blank_index=0,
                               logits_time_major=False)
 
-    return ctc_loss
+    return ctc_loss.numpy()
 
 
 def calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndarray):
@@ -118,5 +118,5 @@ def calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndar
         'char_substitution': character_process_out.substitutions,
 
     }
-    results = {k: tf.convert_to_tensor([v]) for k, v in results.items()}
+    results = {k: np.array([v]) for k, v in results.items()}
     return results

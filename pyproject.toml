@@ -8,23 +8,17 @@ packages = [{include = "librispeech_clean"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8, <3.10"
-code-loader = "^1.0.9"
-onnxruntime = "^1.15.1"
-transformers = "^4.32.1"
-evaluate = "^0.4.0"
-google-cloud-storage = "^2.10.0"
-#onnx2kerastl = "^0.0.114"
-jiwer = "^3.0.3"
-matplotlib = "^3.7.2"
-sounddevice = "^0.4.6"
-onnx = "1.14.0"
+code-loader = "^1.0.79"
+code-loader-helpers = "^1.0.20"
+librosa = "^0.11.0"
+textstat = "^0.7.5"
 textblob = "^0.17.1"
-tensorflow = "2.13.1"
-librosa = "^0.10.1"
-readability = "^0.3.1"
-textatistic = "^0.0.1"
-textstat = "^0.7.3"
-opencv-python = "^4.9.0.80"
+google-cloud-storage = "^3.1.0"
+jiwer = "^3.1.0"
+transformers = "^4.32.1"
+onnx2kerastl = "^0.0.164"
+pandas = "2.0.3"
+onnxruntime = "1.19.2"
 
 
 [tool.poetry.group.dev.dependencies]

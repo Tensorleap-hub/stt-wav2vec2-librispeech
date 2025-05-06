@@ -3,6 +3,10 @@ from librispeech_clean.packages import install_all_packages
 
 install_all_packages()
 import nltk
+# nltk.download('punkt')
+nltk.download('punkt_tab')
+#TODO: can replace nltk.download('punkt_tab') : # nltk.data.path.append('/nfs/nltk_data')  # Adjust based on your system
+# nltk.download('punkt', download_dir='/nfs/nltk_data')
 import pandas as pd
 from typing import List
 import numpy as np
@@ -23,7 +27,6 @@ from librispeech_clean.wav2vec_processor import ProcessorSingleton
 from librosa.feature import spectral_flatness, spectral_contrast, melspectrogram, mfcc, rms, spectral_centroid, \
     spectral_bandwidth, spectral_rolloff, poly_features, zero_crossing_rate
 
-nltk.download('punkt')
 
 
 def merge_records_metadata(df: pd.DataFrame):
@@ -247,5 +250,3 @@ leap_binder.set_visualizer(display_waveform, name='waveform',
 
 leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
 
-if __name__ == '__main__':
-    leap_binder.check()
