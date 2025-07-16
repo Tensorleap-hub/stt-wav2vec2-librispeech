@@ -1,5 +1,5 @@
 codeIntegrationId: 6575dcdd21dee20019f40e3a
-projectId: ""
+projectId: 6874260a4f3167fb8b72fe00
 secretId: ""
 entryFile: leap_binder.py
 include:
@@ -14,3 +14,5 @@ include:
     - librispeech_clean/utils.py
     - librispeech_clean/visualizers.py
     - librispeech_clean/wav2vec_processor.py
+    - requirements.txt
+pythonVersion: py38

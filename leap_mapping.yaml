@@ -90,22 +90,6 @@ decorators:
         - outputKey: numeric_labels
           operation: GroundTruth
           id: '760'
-    outputs:
-      loss:
-        - inputKey: '0'
-          operation: Adam
-          id: '762'
-  - operation: Adam
-    data:
-      type: Optimizer
-      custom_input_keys:
-        - 762-0
-    id: '762'
-    inputs:
-      '0':
-        - outputKey: loss
-          operation: CustomLoss
-          id: '761'
     outputs: {}
   - operation: Metric
     data:
