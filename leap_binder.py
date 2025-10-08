@@ -1,3 +1,6 @@
+import numpy.typing as npt
+from code_loader.contract.visualizer_classes import LeapText, LeapImage, LeapTextMask, LeapGraph
+from tensorflow.python.framework.ops import EagerTensor
 
 from librispeech_clean.packages import install_all_packages
 
@@ -27,6 +30,9 @@ from librispeech_clean.wav2vec_processor import ProcessorSingleton
 from librosa.feature import spectral_flatness, spectral_contrast, melspectrogram, mfcc, rms, spectral_centroid, \
     spectral_bandwidth, spectral_rolloff, poly_features, zero_crossing_rate
 
+from code_loader.inner_leap_binder.leapbinder_decorators import tensorleap_preprocess, tensorleap_input_encoder, \
+    tensorleap_custom_visualizer, tensorleap_gt_encoder, tensorleap_metadata, tensorleap_custom_loss, \
+    tensorleap_custom_metric
 
 
 def merge_records_metadata(df: pd.DataFrame):
@@ -47,6 +53,7 @@ def merge_records_metadata(df: pd.DataFrame):
     return df
 
 # -data processing-
+@tensorleap_preprocess()
 def get_data_subsets() -> List[PreprocessResponse]:
     responses = []
     for dataset_slice, slice_dict in config.get_parameter('dataset_slices').items():
@@ -59,7 +66,7 @@ def get_data_subsets() -> List[PreprocessResponse]:
             responses.append(response)
     return responses
 
-
+@tensorleap_input_encoder('input_encoder')
 def get_input_audio(idx: int, data: PreprocessResponse, padded: bool = True) -> np.ndarray:
     data = data.data
     audio_gcs_path = data.iloc[idx]['audio_path']
@@ -72,7 +79,7 @@ def get_input_audio(idx: int, data: PreprocessResponse, padded: bool = True) -> 
     padded_audio_array = np.pad(audio_array, (0, padding))
     return padded_audio_array
 
-
+@tensorleap_gt_encoder('gt_transcription')
 def get_gt_transcription(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
     processor = ProcessorSingleton().get_processor()
@@ -84,7 +91,7 @@ def get_gt_transcription(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 from typing import Dict, Union
 
-
+@tensorleap_metadata('metadata_speech_dict')
 def get_metadata_speech_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[int, float, str]]:
     sample = data.data.iloc[idx]
     audio_array = get_input_audio(idx, data, padded=False)
@@ -164,7 +171,7 @@ def char_max(transcription_no_spaces):
 
     return max_char, max_count, min_char, min_count
 
-
+@tensorleap_metadata('metadata_text_dict')
 def get_metadata_text_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[int, float, str]]:
     data = data.data
     transcription = data.iloc[idx]['text']
@@ -188,7 +195,7 @@ def get_metadata_text_dict(idx: int, data: PreprocessResponse) -> Dict[str, Unio
 
     return metadata
 
-
+@tensorleap_metadata('metadata_readability_text')
 def get_metadata_readability_text(idx: int, data: PreprocessResponse):
     data = data.data
     transcription = data.iloc[idx]['text']
@@ -210,7 +217,7 @@ def get_metadata_readability_text(idx: int, data: PreprocessResponse):
     }
     return metadata
 
-
+@tensorleap_metadata('metadata_records')
 def get_records_metadata(idx: int, data: PreprocessResponse):
     metadata_dic = {}
     df = data.data
@@ -219,34 +226,68 @@ def get_records_metadata(idx: int, data: PreprocessResponse):
     metadata_dic["project_chap"] = str(df.project_chap.iloc[idx])
     return metadata_dic
 
+@tensorleap_custom_visualizer('transcription', LeapDataType.Text)
+def call_display_predicted_transcription(data: npt.NDArray[np.float32]) -> LeapText:
+     logits_new=data.transpose((0, 2, 1))
+     return display_predicted_transcription(logits_new)
+
+@tensorleap_custom_visualizer('reference', LeapDataType.Text)
+def call_display_gt_transcription(data: npt.NDArray[np.float32]) -> LeapText:
+     return display_gt_transcription(data)
+
+@tensorleap_custom_visualizer('vis_alignments_pred', LeapDataType.TextMask)
+def call_vis_alignments_pred(prediction: np.ndarray, numeric_labels: np.ndarray) -> LeapTextMask:
+     prediction_new=prediction.transpose((0, 2, 1))
+     return vis_alignments_pred(prediction_new,numeric_labels)
+
+@tensorleap_custom_visualizer('mel_spectrogram', LeapDataType.Image,display_mel_spectrogram_heatmap)
+def call_display_mel_spectrogram(data: npt.NDArray[np.float32]) -> LeapImage:
+     return display_mel_spectrogram(data)
+
+@tensorleap_custom_visualizer('waveform', LeapDataType.Image,display_waveform_heatmap)
+def call_display_waveform(data: npt.NDArray[np.float32]) -> LeapGraph:
+     return display_waveform(data)
 
 
 
-leap_binder.set_preprocess(get_data_subsets)
-leap_binder.set_input(get_input_audio, 'audio_array')
-leap_binder.set_ground_truth(get_gt_transcription, 'numeric_labels')
-leap_binder.add_prediction('characters',
-                           ['<pad>', '<s>', '</s>', '<unk>', '|', 'E', 'T', 'A', 'O', 'N', 'I', 'H', 'S', 'R', 'D', 'L',
-                            'U', 'M', 'W', 'C', 'F', 'G', 'Y', 'P', 'B', 'V', 'K', "'", 'X', 'J', 'Q', 'Z'])
+@tensorleap_custom_loss('ctc_loss')
+def call_ctc_loss(logits: np.ndarray, numeric_labels: np.ndarray) -> EagerTensor:
+     logits_new=logits.transpose((0, 2, 1))
+     return ctc_loss(logits_new,numeric_labels)
 
-leap_binder.add_custom_metric(calculate_error_rate_metrics, 'error_rate_metrics')
-leap_binder.add_custom_loss(ctc_loss, 'ctc_loss')
+@tensorleap_custom_metric('error_rate_metrics')
+def call_calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndarray):
+    prediction_new = prediction.transpose((0, 2, 1))
+    return calculate_error_rate_metrics(prediction_new, numeric_labels)
 
-leap_binder.set_metadata(get_metadata_speech_dict, 'metadata_speech_dict')
-leap_binder.set_metadata(get_metadata_text_dict, 'metadata_text_dict')
-leap_binder.set_metadata(get_metadata_readability_text, 'metadata_readability_text')
-leap_binder.set_metadata(get_records_metadata, 'metadata_records')
 
-leap_binder.set_visualizer(display_predicted_transcription, name='transcription',
-                           visualizer_type=LeapDataType.Text)
-leap_binder.set_visualizer(display_gt_transcription, name='reference',
-                           visualizer_type=LeapDataType.Text)
-leap_binder.set_visualizer(display_mel_spectrogram, name='mel_spectrogram',
-                           heatmap_visualizer=display_mel_spectrogram_heatmap,
-                           visualizer_type=LeapDataType.Image)
-leap_binder.set_visualizer(display_waveform, name='waveform',
-                           heatmap_visualizer=display_waveform_heatmap,
-                           visualizer_type=LeapDataType.Graph)
 
-leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
 
+# leap_binder.set_preprocess(get_data_subsets)
+# leap_binder.set_input(get_input_audio, 'audio_array')
+# leap_binder.set_ground_truth(get_gt_transcription, 'numeric_labels')
+# leap_binder.add_prediction('characters',
+#                            ['<pad>', '<s>', '</s>', '<unk>', '|', 'E', 'T', 'A', 'O', 'N', 'I', 'H', 'S', 'R', 'D', 'L',
+#                             'U', 'M', 'W', 'C', 'F', 'G', 'Y', 'P', 'B', 'V', 'K', "'", 'X', 'J', 'Q', 'Z'])
+
+# leap_binder.add_custom_metric(calculate_error_rate_metrics, 'error_rate_metrics')
+# leap_binder.add_custom_loss(ctc_loss, 'ctc_loss')
+
+# leap_binder.set_metadata(get_metadata_speech_dict, 'metadata_speech_dict')
+# leap_binder.set_metadata(get_metadata_text_dict, 'metadata_text_dict')
+# leap_binder.set_metadata(get_metadata_readability_text, 'metadata_readability_text')
+# leap_binder.set_metadata(get_records_metadata, 'metadata_records')
+
+# leap_binder.set_visualizer(display_predicted_transcription, name='transcription',
+#                            visualizer_type=LeapDataType.Text)
+# leap_binder.set_visualizer(display_gt_transcription, name='reference',
+#                            visualizer_type=LeapDataType.Text)
+# leap_binder.set_visualizer(display_mel_spectrogram, name='mel_spectrogram',
+#                            heatmap_visualizer=display_mel_spectrogram_heatmap,
+#                            visualizer_type=LeapDataType.Image)
+# leap_binder.set_visualizer(display_waveform, name='waveform',
+#                            heatmap_visualizer=display_waveform_heatmap,
+#                            visualizer_type=LeapDataType.Graph)
+#
+# leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
+#
