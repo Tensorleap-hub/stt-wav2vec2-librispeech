@@ -1,11 +1,10 @@
 codeIntegrationId: 6874a2017fd822d4e30c39ae
-projectId: 6874a939e56b06f5cc525553
+projectId: 68e757dbd64fecb62f966684
 secretId: ""
-entryFile:entryFile: leap_integration.py
+entryFile: ""
 include:
     - leap_binder.py
     - leap_integration.py
-    - leap_custom_test.py
     - librispeech_clean/asr_config.yml
     - librispeech_clean/packages.py
     - librispeech_clean/configuration.py

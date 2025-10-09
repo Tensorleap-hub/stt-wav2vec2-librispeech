@@ -79,14 +79,26 @@ def get_input_audio(idx: int, data: PreprocessResponse, padded: bool = True) -> 
     padded_audio_array = np.pad(audio_array, (0, padding))
     return padded_audio_array
 
-@tensorleap_gt_encoder('gt_transcription')
-def get_gt_transcription(idx: int, data: PreprocessResponse) -> np.ndarray:
+def get_input_audio_no_padding(idx: int, data: PreprocessResponse, padded: bool = False) -> np.ndarray:
+    data = data.data
+    audio_gcs_path = data.iloc[idx]['audio_path']
+    fpath = download(audio_gcs_path)
+    audio_array = np.load(fpath)[0]
+    if not padded:
+        return audio_array
+
+    padding = config.get_parameter('max_sequence_length') - audio_array.size
+    padded_audio_array = np.pad(audio_array, (0, padding))
+    return padded_audio_array
+
+@tensorleap_gt_encoder('numeric_labels')
+def get_gt_transcription(idx: int, data: PreprocessResponse):
     data = data.data
     processor = ProcessorSingleton().get_processor()
     transcription = data.iloc[idx]['text']
     numeric_labels = processor.tokenizer.encode(transcription)
     padded_labels = pad_gt_numeric_labels(numeric_labels)
-    return padded_labels
+    return np.array(padded_labels).astype('float32')
 
 
 from typing import Dict, Union
@@ -94,7 +106,7 @@ from typing import Dict, Union
 @tensorleap_metadata('metadata_speech_dict')
 def get_metadata_speech_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[int, float, str]]:
     sample = data.data.iloc[idx]
-    audio_array = get_input_audio(idx, data, padded=False)
+    audio_array = get_input_audio_no_padding(idx, data)
     sr = config.get_parameter('sampling_rate')
 
     # Extract features
@@ -244,7 +256,7 @@ def call_vis_alignments_pred(prediction: np.ndarray, numeric_labels: np.ndarray)
 def call_display_mel_spectrogram(data: npt.NDArray[np.float32]) -> LeapImage:
      return display_mel_spectrogram(data)
 
-@tensorleap_custom_visualizer('waveform', LeapDataType.Image,display_waveform_heatmap)
+@tensorleap_custom_visualizer('waveform', LeapDataType.Graph,display_waveform_heatmap)
 def call_display_waveform(data: npt.NDArray[np.float32]) -> LeapGraph:
      return display_waveform(data)
 

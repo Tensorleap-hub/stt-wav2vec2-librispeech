@@ -69,7 +69,7 @@ def check_custom_integration(idx, data):
 
     keras_logits = keras_model(batched_input)
 
-    keras_logits = keras_logits.numpy().transpose((0, 2, 1))
+    # keras_logits = keras_logits.numpy().transpose((0, 2, 1))
 
 
 
