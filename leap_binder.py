@@ -17,7 +17,6 @@ from code_loader.contract.enums import LeapDataType
 import textstat
 from textblob import TextBlob
 from librispeech_clean.configuration import config
-from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 from librispeech_clean.gcs_utils import download
