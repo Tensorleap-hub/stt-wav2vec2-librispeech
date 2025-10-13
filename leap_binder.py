@@ -1,10 +1,6 @@
 import numpy.typing as npt
 from code_loader.contract.visualizer_classes import LeapText, LeapImage, LeapTextMask, LeapGraph
 from tensorflow.python.framework.ops import EagerTensor
-
-from librispeech_clean.packages import install_all_packages
-
-install_all_packages()
 import nltk
 # nltk.download('punkt')
 nltk.download('punkt_tab')
