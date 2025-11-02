@@ -1,11 +1,10 @@
-codeIntegrationId: 6575dcdd21dee20019f40e3a
-projectId: 6874260a4f3167fb8b72fe00
+codeIntegrationId: 69070a43fcfae1a75a5fd309
+projectId: 69070a3dfcfae1a75a5fd302
 secretId: ""
-entryFile: leap_binder.py
+entryFile: leap_integration.py
 include:
-    - leap_mapping.yaml
     - leap_binder.py
-    - leap_custom_test.py
+    - leap_integration.py
     - librispeech_clean/asr_config.yml
     - librispeech_clean/packages.py
     - librispeech_clean/configuration.py
