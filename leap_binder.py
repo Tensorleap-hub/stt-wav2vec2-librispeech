@@ -2,10 +2,7 @@ import numpy.typing as npt
 from code_loader.contract.visualizer_classes import LeapText, LeapImage, LeapTextMask, LeapGraph
 from tensorflow.python.framework.ops import EagerTensor
 import nltk
-# nltk.download('punkt')
 nltk.download('punkt_tab')
-#TODO: can replace nltk.download('punkt_tab') : # nltk.data.path.append('/nfs/nltk_data')  # Adjust based on your system
-# nltk.download('punkt', download_dir='/nfs/nltk_data')
 import pandas as pd
 from typing import List
 import numpy as np
@@ -268,33 +265,3 @@ def call_calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np
     return calculate_error_rate_metrics(prediction_new, numeric_labels)
 
 
-
-
-# leap_binder.set_preprocess(get_data_subsets)
-# leap_binder.set_input(get_input_audio, 'audio_array')
-# leap_binder.set_ground_truth(get_gt_transcription, 'numeric_labels')
-# leap_binder.add_prediction('characters',
-#                            ['<pad>', '<s>', '</s>', '<unk>', '|', 'E', 'T', 'A', 'O', 'N', 'I', 'H', 'S', 'R', 'D', 'L',
-#                             'U', 'M', 'W', 'C', 'F', 'G', 'Y', 'P', 'B', 'V', 'K', "'", 'X', 'J', 'Q', 'Z'])
-
-# leap_binder.add_custom_metric(calculate_error_rate_metrics, 'error_rate_metrics')
-# leap_binder.add_custom_loss(ctc_loss, 'ctc_loss')
-
-# leap_binder.set_metadata(get_metadata_speech_dict, 'metadata_speech_dict')
-# leap_binder.set_metadata(get_metadata_text_dict, 'metadata_text_dict')
-# leap_binder.set_metadata(get_metadata_readability_text, 'metadata_readability_text')
-# leap_binder.set_metadata(get_records_metadata, 'metadata_records')
-
-# leap_binder.set_visualizer(display_predicted_transcription, name='transcription',
-#                            visualizer_type=LeapDataType.Text)
-# leap_binder.set_visualizer(display_gt_transcription, name='reference',
-#                            visualizer_type=LeapDataType.Text)
-# leap_binder.set_visualizer(display_mel_spectrogram, name='mel_spectrogram',
-#                            heatmap_visualizer=display_mel_spectrogram_heatmap,
-#                            visualizer_type=LeapDataType.Image)
-# leap_binder.set_visualizer(display_waveform, name='waveform',
-#                            heatmap_visualizer=display_waveform_heatmap,
-#                            visualizer_type=LeapDataType.Graph)
-#
-# leap_binder.set_visualizer(vis_alignments_pred, name="vis_alignments_pred", visualizer_type=LeapDataType.TextMask)
-#

@@ -311,13 +311,13 @@ importlib-resources = ">=5"
 
 [[package]]
 name = "code-loader"
-version = "1.0.137"
+version = "1.0.143.dev4"
 description = ""
 optional = false
 python-versions = "<3.13,>=3.8"
 files = [
-    {file = "code_loader-1.0.137-py3-none-any.whl", hash = "sha256:1f8f45bdae3f85839c59e452c054526094c0b7675b23945ef27960dde0f63750"},
-    {file = "code_loader-1.0.137.tar.gz", hash = "sha256:e7bdc8a4c4b05c6668aedfb30e54acb9f52394e9613173e83e0ff43b1f84836a"},
+    {file = "code_loader-1.0.143.dev4-py3-none-any.whl", hash = "sha256:a23a584774cbc02d0b09732c2d8c7f45d1fff1f64e1c7a64599d935a87dfb72a"},
+    {file = "code_loader-1.0.143.dev4.tar.gz", hash = "sha256:93516031633f3d0b9c624796a5cd5aad0a24c29a06989360c8dd2518640f4083"},
 ]
 
 [package.dependencies]
@@ -3920,4 +3920,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8, <3.10"
-content-hash = "1b07becb62de17c70613e900585226d27d8a6dd156cfde0ad7ab01174b8f170d"
+content-hash = "5b8c2c14a7de7058a7b7c48033a8b753abdd5ebbb34736b42e8fb9d79295f3d7"

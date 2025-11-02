@@ -13,14 +13,6 @@ prediction_type1 = PredictionTypeHandler('characters',
 
 @tensorleap_load_model([prediction_type1])
 def load_model():
-    #TODO
-    # model_path = 'model/wav2vec.onnx' #onnx_example
-    # urllib.request.urlretrieve(
-    #         'https://storage.googleapis.com/example-datasets-47ml982d/wav2vec/wav2vec.onnx',
-    #         onnx_model_path)
-    # ort_session = ort.InferenceSession(onnx_model_path)
-    # return ort_session
-
     keras_model_path = 'model/wav2vec.h5'
     keras_model = tf.keras.models.load_model(keras_model_path, custom_objects={'OnnxErf': OnnxErf, 'OnnxReduceMean':
         OnnxReduceMean, 'OnnxSqrt': OnnxSqrt})
