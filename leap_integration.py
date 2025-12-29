@@ -8,7 +8,7 @@ from code_loader.inner_leap_binder.leapbinder_decorators import tensorleap_load_
 
 prediction_type1 = PredictionTypeHandler('characters',
                            ['<pad>', '<s>', '</s>', '<unk>', '|', 'E', 'T', 'A', 'O', 'N', 'I', 'H', 'S', 'R', 'D', 'L',
-                            'U', 'M', 'W', 'C', 'F', 'G', 'Y', 'P', 'B', 'V', 'K', "'", 'X', 'J', 'Q', 'Z'])
+                            'U', 'M', 'W', 'C', 'F', 'G', 'Y', 'P', 'B', 'V', 'K', "'", 'X', 'J', 'Q', 'Z'],channel_dim=-1)
 
 
 @tensorleap_load_model([prediction_type1])

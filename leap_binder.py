@@ -6,7 +6,7 @@ nltk.download('punkt_tab')
 import pandas as pd
 from typing import List
 import numpy as np
-from code_loader.contract.enums import LeapDataType
+from code_loader.contract.enums import LeapDataType, MetricDirection, DataStateType
 import textstat
 from textblob import TextBlob
 from librispeech_clean.configuration import config
@@ -48,17 +48,18 @@ def merge_records_metadata(df: pd.DataFrame):
 @tensorleap_preprocess()
 def get_data_subsets() -> List[PreprocessResponse]:
     responses = []
-    for dataset_slice, slice_dict in config.get_parameter('dataset_slices').items():
+    states=[DataStateType.training, DataStateType.validation, DataStateType.test]
+    for state,(dataset_slice, slice_dict) in zip(states,config.get_parameter('dataset_slices').items()):
         if slice_dict['path'] is not None:
             fpath = download(slice_dict['path'])
             data = pd.read_csv(fpath, index_col=0)
             data = merge_records_metadata(data)
             data = data.sample(n=slice_dict['n_samples'], random_state=config.get_parameter('seed'))
-            response = PreprocessResponse(length=slice_dict['n_samples'], data=data)
+            response = PreprocessResponse(length=slice_dict['n_samples'], data=data,state=state)
             responses.append(response)
     return responses
 
-@tensorleap_input_encoder('input_encoder')
+@tensorleap_input_encoder('input_encoder',channel_dim=-1)
 def get_input_audio(idx: int, data: PreprocessResponse, padded: bool = True) -> np.ndarray:
     data = data.data
     audio_gcs_path = data.iloc[idx]['audio_path']
@@ -259,7 +260,7 @@ def call_ctc_loss(logits: np.ndarray, numeric_labels: np.ndarray) -> EagerTensor
      logits_new=logits.transpose((0, 2, 1))
      return ctc_loss(logits_new,numeric_labels)
 
-@tensorleap_custom_metric('error_rate_metrics')
+@tensorleap_custom_metric('error_rate_metrics',direction=MetricDirection.Downward)
 def call_calculate_error_rate_metrics(prediction: np.ndarray, numeric_labels: np.ndarray):
     prediction_new = prediction.transpose((0, 2, 1))
     return calculate_error_rate_metrics(prediction_new, numeric_labels)
