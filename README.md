@@ -1,33 +1,28 @@
-# LibriSpeech Dataset With Wav2vec
+# Speech-to-Text with Wav2Vec 2.0 on LibriSpeech
 
 ![Untitled](images/BackgroundImg2.png)
 
-This project showcases a speech recognition task for predicting the text from an audio file. We utilize a 
-[wav2vec](https://arxiv.org/abs/2006.11477) model trained on the librispeech-asr benchmark, implemented using Keras and 
-Tensorflow.
+This project demonstrates a speech recognition pipeline for transcribing audio files to text. We utilize a pretrained [Wav2Vec 2.0](https://arxiv.org/abs/2006.11477) model, fine-tuned on the LibriSpeech ASR benchmark, implemented using Keras and TensorFlow.
 
-Using Tensorleap we can easily debug and improve the model development process. 
+The project integrates with [Tensorleap](https://tensorleap.ai/) to enable advanced model debugging, performance analysis, and visualization of the model's internal representations.
 
 ### The Dataset
 
-LibriSpeech comprises around 1000 hours of English speech recorded at a 16kHz sampling rate. This corpus, curated by 
-Vassil Panayotov with support from Daniel Povey, is extracted from read audiobooks sourced from the LibriVox project. 
-The data has undergone meticulous segmentation and alignment.
+[LibriSpeech](https://www.openslr.org/12) is a corpus of approximately 1,000 hours of English speech recorded at 16kHz. Curated by Vassil Panayotov with support from Daniel Povey, the dataset is derived from read audiobooks in the LibriVox project. The data has been carefully segmented and aligned for speech recognition tasks.
 
 ### Methods
 
-evaluate a pretrained wav2vec model on [librosaspeech](https://www.openslr.org/12) dataset. The model was evaluated with a batch size of 1, on 
-Connectionist temporal classification (CTC) loss.
+We evaluate a pretrained Wav2Vec 2.0 model on the LibriSpeech dataset using a batch size of 1, with Connectionist Temporal Classification (CTC) loss as the objective function.
 
 ### Latent Space Exploration
 
 Initially, you'll notice that the latent space is organized in such a way that the samples with fewer words with mainly short records are 
 positioned towards the right, while those with a higher word count and mainly longer record length are positioned towards the left.
-When the model has better results on the longer records and texts. To demonstrate we color the samples based on the words count and based on the record time:
+To demonstrate, we color the samples based on word count and record time:
 
-![Untitled](images/dict_word_count.png)_Model's Latent Space colored by Word count_
+![Untitled](images/word_count.png)_Model's Latent Space colored by Word count_
 
-![Untitled](images/minutes_record.png)_Model's Latent Space colored by record minutes length_
+![Untitled](images/record_minutes.png)_Model's Latent Space colored by record minutes length_
 
 We visualize below an example of a sample with long speech duration in comparison to a 
 sample with short record speech and text. 
@@ -38,7 +33,7 @@ sample with short record speech and text.
   <img src="images/long_speech_waveform.png" alt="Image 2" style="width: 50%;">
 </div>
 
-*Long speech sample*
+*Long record sample*
 
 
 <div style="display: flex;">
@@ -46,17 +41,20 @@ sample with short record speech and text.
   <img src="images/short_speech_waveform.png" alt="Image 4" style="width: 50%;">
 </div>
 
-_Short speech sample_
+_Short record sample_
 
 Additionally, we observe that the latent space is almost perfectly divided based on the speaker's gender:
-![Untitled](images/gender_record.png)_Model's Latent Space colored by record minutes length_
+![Untitled](images/gender.png)_Model's Latent Space colored by speaker's gender_
 
 
 ### Weak Clusters Detection
-Tensorleap's engine calculates and detects using unsupervised methods clusters that tend to have lower performance than the overall data distribution.
-For instance, we can observe a low performance cluster detected in the platform that consist mainly Female samples with high `spectral centroid mean` (correspond to high pitch):
+Tensorleap automatically identifies weak clusters using unsupervised analysis over the model’s internal representations. These clusters correspond to coherent subsets of the data that exhibit significantly lower performance compared to the overall distribution.
 
-![Untitled](images/FhighPitch_weak_cluster.png)_Low Performance Cluster: female gender and high pitch_
+In the example above, Tensorleap detects a low-performance cluster composed of short text samples with simple vocabulary, inputs that are generally easy to read. Despite their apparent simplicity, this cluster shows degraded model performance. The detected insight reveals a high prevalence of unintended character insertions in the detected text, pointing to a systematic failure mode.
+
+By surfacing such clusters, Tensorleap helps expose hidden patterns of model failure that are often missed by aggregate metrics.
+
+![Untitled](images/aggressor_51.png)_Low Performance Cluster: short and simple samples with high inserstion error_
 
 
 
