@@ -60,17 +60,17 @@ By surfacing such clusters, Tensorleap helps expose hidden patterns of model fai
 
 ### Dashboard
 
-We have added several metrics to the model. Using Tensorleap we can easily build an analytics dashboard. In the screenshot 
-below we can see a dashboard contain the dale chall readability score VS all metrics.
-Dale chall readability score computes a readability score based on a formula that considers the use of difficult words 
-in the text, higher results indicate on higher difficulty.
+We added multiple evaluation metrics and used Tensorleap to analyze model behavior across different readability-related metadata axes.
 
-It can be seen that metrics like Word Error Rate, Character Error Rate, Word Information Lost, Character Deletions, 
-Word Deletion and the CTC loss are increase as the dale chall score increases.
-In contrast, of metrics like Character Insertions, Word Substitutions, Character Substitutions, Word Insertions and Word 
-Information Preserved decrease as the dale chall score increases.
+In the leftmost graph, Word Error Rate is plotted against the Gunning Fog index, showing a clear increase in error as linguistic complexity grows. This indicates that texts with longer sentences and more complex words are harder for the model to transcribe accurately.
 
-![Untitled](images/readability_text_dale_chall_readability_score.png)_Dale Chall Readability Score VS Metrics_
+The middle graph shows CTC loss versus syllable count, revealing a strong upward trend: utterances with higher syllabic complexity lead to higher loss, suggesting increased alignment difficulty at the acoustic–linguistic level.
+
+In the rightmost graph, loss is plotted against the number of difficult words, where we again observe degradation as lexical difficulty increases.
+
+Across all three views, different readability proxies consistently expose the same pattern: increasing linguistic complexity correlates with higher loss and error, making readability a meaningful axis for systematic error analysis rather than isolated failures.
+
+![Untitled](images/graphs.png)_Dificulty Scores VS Metrics_
 
 
 # Project Quick Start
